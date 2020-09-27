@@ -115,8 +115,6 @@ write.csv(geno, "wheat_geno.csv", row.names = FALSE)
 
 ##******************************************************************************
 ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Assign the GeneIDs to the introns 
-
 # first need a gene table which includes gene names and locations, I prepared it from exons_table (I could have extracted the genes from gff3 file)
 genes <- unique(exons_table$gene_name)
 genes_table <- data.frame()
@@ -135,6 +133,7 @@ write.csv(genes_table, "wheat_genes_table.csv")
 
 genes_table <- read.csv("wheat_gene_table_no_noncoding_uniq.csv", sep = "\t")
 
+# Assign the GeneIDs to the introns 
 qtl$geneID2 <- 1:length(qtl$clusterID) 
 for (i in 1:length(qtl$geneID2)) { 
   region <- genes_table[which(qtl$intron_chr[i] == genes_table$chr), ] 
@@ -174,8 +173,6 @@ for (i in 1:length(sQTL_Results$qtl_type)) {
 
 na_qtl_type <- sQTL_Results[which(is.na(sQTL_Results$qtl_type2)),]
 head(na_qtl_type[,-c(15,19,26,27)])
-
-
 
 ##******************************************************************************
 ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -483,11 +480,10 @@ library(biomaRt)
 # Therefore, I used it by dividing the file into 3. Or you may do this for each chromosomes.
 
 # To work in quening system with Biomart there are other versions like MartShell etc.
-# I think it needs java to download. Look at this later.  
 
 ##******************************************************************************
 ##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# following for the genes found in differentially alternatively spliced analyses 
+# following for the genes found in differentially alternatively spliced introns analyses 
 # Leafcutter produced the variable 'introns'
 
 introns$region <-  1:length(introns$gene)
@@ -715,56 +711,4 @@ BioCircos(tracklist, genomeFillColor = c(rep("wheat2", 22)),
 
 
 BioCircosOutput("wheat", width = "100%", height = "400px")
-
-?BioCircos()
-##******************************************************************************
-##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-sQTL <- read.csv("sQTL_Results_Report.csv")
-sQTL_cis <- sQTL[which(sQTL$qtl_type2 == "cis"),]
-sQTL_trans <- sQTL[which(sQTL$qtl_type2 == "trans"),]
-min(sQTL_trans$lod.1)
-max(sQTL_trans$lod.1)
-homoelog_genes <- homoelog_genes[which(homoelog_genes$GeneID != 0),]
-homoelog_genes <- homoelog_genes[which(homoelog_genes$GeneID != 2),]
-homoelog_genes <- unique(homoelog_genes[sort(homoelog_genes$GeneID),])
-homoelog_genes <- sQTL2[,c(8,19,28,29,30)]
-head(unique(homoelog_genes[order(homoelog_genes$clusterID.1),]))
-qtl_loc <- unique(sQTL$qtl_loc_2)
-list <- lapply(qtl_loc, function(x) sQTL[which(sQTL$qtl_loc_2 == x),])
-
-write.table(sQTL[which(sQTL$effect == "BB"),]$GeneID, "BBgenes.txt", quote=FALSE)
-write.table(sQTL[which(sQTL$effect == "AA"),]$GeneID, "AAgenes.txt", quote = FALSE)
-
-sgenes <- read.csv("../jul3rd_Results/sgenes.txt", header = FALSE)
-write.table(intersect(sgenes$V1, das), "intersec_sgenes_das.txt", quote=FALSE)
-#egrep -o "Traes.+" AAgenes.txt 
-
-
-colnames(qtl) <- c("index", "intron","AA","BB","A.pheno.mean","B.pheno.mean","effect","intron_chr","intron_start","intron_end","qtl_chr","qtl_start","qtl_end","qtl_type","lod", "clusterID", "gene", "intron_regions", "qtl_regions")
-
-
-# Background are always placed below other tracks
-tracklist = tracklist + BioCircosBackgroundTrack("myBackgroundTrack", 
-                                                 minRadius = 1.25, 
-                                                 maxRadius = 2, 
-                                                 borderColors = "white", 
-                                                 borderSize = 0.6, 
-                                                 fillColors = "white")
-
-
-BioCircos(tracklist, genomeFillColor = "PuOr",
-          chrPad = 0.05, displayGenomeBorder = FALSE, yChr =  FALSE,
-          genomeTicksDisplay = FALSE,  genomeLabelTextSize = 18, genomeLabelDy = 0, genome = as.list(lengthChr))
-
-
-
-
-
-
-
-
-
-
-
 
